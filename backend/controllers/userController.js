@@ -193,3 +193,88 @@ export const getuser=catchAsyncError(async(req,res,next)=>{
         us
     })
 })
+
+export const addEmergencyContact = catchAsyncError(async (req, res, next) => {
+    const { userId, name, phone } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!name || !phone) {
+        return res.json({ success: false, error: "Name and phone are required for emergency contact." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    user.emergencyContact.push({ name, phone });
+    await user.save();
+    res.json({ success: true, message: "Emergency contact added.", emergencyContact: user.emergencyContact });
+});
+
+export const deleteEmergencyContact = catchAsyncError(async (req, res, next) => {
+    const { userId, phone } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!phone) {
+        return res.json({ success: false, error: "Phone is required to delete emergency contact." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    user.emergencyContact = user.emergencyContact.filter(ec => ec.phone !== phone);
+    await user.save();
+    res.json({ success: true, message: "Emergency contact deleted.", emergencyContact: user.emergencyContact });
+});
+
+export const updateEmergencyContact = catchAsyncError(async (req, res, next) => {
+    const { userId, oldPhone, name, phone } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!oldPhone || (!name && !phone)) {
+        return res.json({ success: false, error: "Old phone and at least one of name or phone are required." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    const contact = user.emergencyContact.find(ec => ec.phone === oldPhone);
+    if (!contact) return res.json({ success: false, error: "Emergency contact not found." });
+    if (name) contact.name = name;
+    if (phone) contact.phone = phone;
+    await user.save();
+    res.json({ success: true, message: "Emergency contact updated.", emergencyContact: user.emergencyContact });
+});
+
+export const updateVehicleDetails = catchAsyncError(async (req, res, next) => {
+    const { userId, vehicleDetails } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!vehicleDetails) {
+        return res.json({ success: false, error: "Vehicle details are required." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    user.vehicleDetails = vehicleDetails;
+    await user.save();
+    res.json({ success: true, message: "Vehicle details updated.", vehicleDetails: user.vehicleDetails });
+});
+
+export const updateInsuranceDetails = catchAsyncError(async (req, res, next) => {
+    const { userId, insuranceDetails } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!insuranceDetails) {
+        return res.json({ success: false, error: "Insurance details are required." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    user.insuranceDetails = insuranceDetails;
+    await user.save();
+    res.json({ success: true, message: "Insurance details updated.", insuranceDetails: user.insuranceDetails });
+});
+
+export const updatePermission = catchAsyncError(async (req, res, next) => {
+    const { userId, permission } = req.body;
+    if (!userId) return res.json({ success: false, error: "userId is required." });
+    if (!permission || !permission.type || typeof permission.value === 'undefined') {
+        return res.json({ success: false, error: "Permission type and value are required." });
+    }
+    const validTypes = ["location", "microphone", "camera"];
+    if (!validTypes.includes(permission.type)) {
+        return res.json({ success: false, error: "Invalid permission type." });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.json({ success: false, error: "User not found." });
+    user.permission[permission.type] = (permission.value === true || permission.value === "true");
+    await user.save();
+    res.json({ success: true, message: `Permission '${permission.type}' updated.`, permission: user.permission });
+});

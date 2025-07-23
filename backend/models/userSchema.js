@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema({
         provider: { type: String },
         policyNo: { type: String }
     },
+    permission: {
+        location: { type: Boolean, default: false },
+        microphone: { type: Boolean, default: false },
+        camera: { type: Boolean, default: false }
+    },
     otp: {
         type: String
     },
