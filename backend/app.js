@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import userrouter from "./routes/userrouter.js";
+import sosrouter from "./routes/sosroute.js";
 import { dbConnect } from "./database/dbconnection.js";
 import { middleware as errorMiddleware } from "./middlewares/error.js";
 const  app = express();
@@ -24,6 +25,7 @@ fileUpload({
 
 
     app.use("/user",userrouter);
+    app.use("/",sosrouter);
 
     dbConnect();
 
